@@ -1,0 +1,31 @@
+----
+-- User configuration file for lsyncd.
+--
+-- {{ ansible_managed }}
+--
+
+-- Standard settings for lsyncd
+settings {
+  logfile = "/var/log/lsyncd/lsyncd.log",
+  statusFile = "/var/log/lsyncd/lsyncd-status.log", 
+  statusInterval = 20,
+  insist = 1
+}
+
+-- List of targets where we want our data to be copied to
+targetlist = {
+{% for host in play_hosts|sort if hostvars[host]['ansible_hostname'] != ansible_hostname %}
+  "{{ hostvars[host]['ansible_hostname'] }}:{{ lsyncd_path }}/"{% if not loop.last %},
+{% endif %}
+{% endfor %}
+
+}
+
+-- Matching the server to the source folder
+for _, server in ipairs(targetlist) do
+  sync{ default.rsync,
+    delay=20,
+    source="{{ lsyncd_path }}/",
+    target=server
+  }
+end

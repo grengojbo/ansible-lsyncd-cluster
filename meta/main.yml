@@ -1,0 +1,21 @@
+---
+galaxy_info:
+  author: Mark Maas
+  description: Set's up the lsyncd (Synching Daemon) across all the hosts in the current play.
+  company: None
+  license: GPLv3
+  min_ansible_version: 1.8
+  platforms:
+  - name: EL
+    versions:
+    - all
+  categories:
+  - cloud
+  - cloud:ec2
+  - cloud:gce
+  - cloud:rax
+  - clustering
+  - networking
+  - system
+dependencies: []
+  
