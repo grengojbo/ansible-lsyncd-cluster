@@ -2,9 +2,10 @@
 # tasks file for ansible-lsyncd-cluster
 
 - name: Install lsyncd
-  yum:
-    name: lsyncd
-    state: installed
+  apt_rpm:
+    name: bar
+    state: present
+    update_cache: yes
 
 - name: Place lsync config
   template:
@@ -12,7 +13,7 @@
     dest: /etc/lsyncd.conf
     backup: yes
   notify: restart lsyncd
-  
+
 # Currently I use the root user to sync and use a different role to setup sshd to make sure root is only allowed from a certain group of ip's and only via a key. Perhaps I should make this configurable in the future, but lsync runs with root privileges anyway.
 - name: Place an ssh config for the root user
   template:
@@ -22,8 +23,8 @@
     group: root
     backup: yes
     mode: 0600
-  
-  
+
+
 # Create your own key! Don't use the supplied one obviously!
 - name: Places a private key for syncing purposes
   copy:
@@ -32,13 +33,13 @@
     owner: root
     group: root
     mode: 0600
-    
+
 - name: Places the public key
   authorized_key:
     key: "{{ lookup('file', 'lsyncd.pub') }}"
     user: root
-    
-    
+
+
 - name: Adjust the maximum amount of inotify watches. If needed
   lineinfile:
     backup: yes
@@ -48,18 +49,18 @@
     state: present
   notify: reload sysctl
   when: lsyncd_max_user_watches is defined
-  
+
 - name: Deactivate the "not master node(s)"
   service:
     name: lsyncd
     enabled: no
     state: stopped
   when: ansible_hostname.find('{{ lsyncd_master_node }}') == -1
-  
+
 - name: Activate the "master node"
   service:
     name: lsyncd
     enabled: yes
     state: started
   when: ansible_hostname.find('{{ lsyncd_master_node }}') != -1
-  
+
